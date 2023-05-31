@@ -175,11 +175,3 @@ class Gaussian:
         for p in M:
             total = total * p
         return total
-
-
-        
-
-x = Gaussian(7)
-x.primefactor()
-
-    
