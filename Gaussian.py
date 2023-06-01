@@ -1,4 +1,3 @@
-
 class Gaussian:
     
     def __init__(self, a=0, b=0) -> None:
@@ -100,8 +99,6 @@ class Gaussian:
         return self.add(-other)
     
     def multiplication(self, other):
-        if type(other) is int:
-            return Gaussian(self.r * other, self.i * other)
         return Gaussian(self.r * other.r - self.i * other.i, self.r * other.i + other.r * self.i)
     
     def __mul__(self, other):
@@ -120,46 +117,46 @@ class Gaussian:
         return norms
     
     def primefactor(self):
-        S = self
+        check = Gaussian(1)
         norms = self.normlist()
         pfactor = []
         for p in norms:
             if p==2:
                 pfactor.append(Gaussian(1,1))
-                S = S // Gaussian(1,1)
             elif (p % 4) == 3:
                 pfactor.append(Gaussian(p,0))
                 norms.remove(p)
-                S = S // Gaussian(p,0)
             elif (p % 4) == 1:
-                l1 = []
-                while len(l1)<1:
-                    for a in range(1,p):
-                        for i in range(p-1,0,-1):
-                            if a*a + i*i == p:
-                                if a>= i:
-                                    l1.append([a,i])
-                                    break
-                                else:
-                                    l1.append([i,a])
-                                    break
-                num1 = l1[0][0]
-                num2 = l1[0][1]
-                u = Gaussian(num1, num2)
+                prime_candidate = None
+                for a in range(1,p):
+                    for i in range(p-1,0,-1):
+                        if a*a + i*i == p:
+                            prime_candidate = Gaussian(max(a,i),min(a,i))
+                            break
+                    if prime_candidate is not None:
+                        break
 
-                if S % u == Gaussian(0):
-                    pfactor.append(u)
-                    S = S // u
+                if self % prime_candidate == Gaussian(0):
+                    pfactor.append(prime_candidate)
                 else:
-                    pfactor.append(u)
-                    S = S // u.conjugate()
-
-        G = Gaussian(1)
-        for p in pfactor:
-            G = G * p
-        u = self // G
-        if u != Gaussian(1):
-            pfactor.append(u)
+                    pfactor.append(prime_candidate.conjugate())
+                
+        for prime in pfactor:
+            check *= prime
+        unit = self // check
+        if unit == Gaussian(1,1):
+            pfactor[-1] = Gaussian(pfactor[-1].i,pfactor[-1].r)
+        elif unit == Gaussian(1,-1):
+            pfactor[-1] = pfactor[-1].conjugate()
+            pfactor.append(Gaussian(0,-1))
+        elif unit == Gaussian(-1,1):
+            pfactor.append(Gaussian(0,1))
+        elif unit == Gaussian(-1,-1):
+            pfactor[-1] = Gaussian(-pfactor[-1].i,-pfactor[-1].r)
+        elif unit == Gaussian(1):
+            pass
+        else:
+            pfactor.append(unit)
 
         return pfactor
         
