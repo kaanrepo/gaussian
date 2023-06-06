@@ -135,8 +135,12 @@ class Gaussian:
                             break
                     if prime_candidate is not None:
                         break
+                
+                result = self
+                for prime in pfactor:
+                    result = result // prime
 
-                if self % prime_candidate == Gaussian(0):
+                if result % prime_candidate == Gaussian(0):
                     pfactor.append(prime_candidate)
                 else:
                     pfactor.append(prime_candidate.conjugate())
